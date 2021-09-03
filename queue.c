@@ -185,6 +185,16 @@ void q_reverse(queue_t *q)
  */
 void q_sort(queue_t *q)
 {
-    /* TODO: You need to write the code for this function */
-    /* TODO: Remove the above comment when you are about to implement. */
+    if (!q || q->size <= 1)
+        return;
+
+    for (list_ele_t *ele = q->head; ele; ele = ele->next) {
+        for (list_ele_t *ele2 = ele->next; ele2; ele2 = ele2->next) {
+            if (strncmp(ele->value, ele2->value, 1024) > 0) {
+                char *tmp = ele->value;
+                ele->value = ele2->value;
+                ele2->value = tmp;
+            }
+        }
+    }
 }
