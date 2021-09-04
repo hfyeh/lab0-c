@@ -178,6 +178,62 @@ void q_reverse(queue_t *q)
     q->head = prev;
 }
 
+static void split(list_ele_t *head, list_ele_t **list_1, list_ele_t **list_2)
+{
+    list_ele_t *slow = head;
+    list_ele_t *fast = head->next;
+
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+
+    *list_2 = slow->next;
+    *list_1 = head;
+    slow->next = NULL;
+}
+
+
+static list_ele_t *merge(list_ele_t *list_1, list_ele_t *list_2)
+{
+    list_ele_t *head = NULL;
+    list_ele_t **cursor = &head;
+
+    while (list_1 && list_2) {
+        if (strncmp(list_1->value, list_2->value, 1024) <= 0) {
+            *cursor = list_1;
+            list_1 = list_1->next;
+        } else {
+            *cursor = list_2;
+            list_2 = list_2->next;
+        }
+        cursor = &((*cursor)->next);
+    }
+
+    if (list_1) {
+        *cursor = list_1;
+    } else if (list_2) {
+        *cursor = list_2;
+    }
+
+    return head;
+}
+
+static list_ele_t *merge_sort(list_ele_t *head)
+{
+    if (!head || !head->next)
+        return head;
+
+    list_ele_t *list_1;
+    list_ele_t *list_2;
+    split(head, &list_1, &list_2);
+
+    list_1 = merge_sort(list_1);
+    list_2 = merge_sort(list_2);
+
+    return merge(list_1, list_2);
+}
+
 /*
  * Sort elements of queue in ascending order
  * No effect if q is NULL or empty. In addition, if q has only one
@@ -188,13 +244,9 @@ void q_sort(queue_t *q)
     if (!q || q->size <= 1)
         return;
 
-    for (list_ele_t *ele = q->head; ele; ele = ele->next) {
-        for (list_ele_t *ele2 = ele->next; ele2; ele2 = ele2->next) {
-            if (strncmp(ele->value, ele2->value, 1024) > 0) {
-                char *tmp = ele->value;
-                ele->value = ele2->value;
-                ele2->value = tmp;
-            }
-        }
+    q->head = merge_sort(q->head);
+
+    while (q->tail->next) {
+        q->tail = q->tail->next;
     }
 }
