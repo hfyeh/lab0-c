@@ -10,6 +10,12 @@
  *   cppcheck-suppress nullPointer
  */
 
+static inline void swap_element(element_t *a, element_t *b)
+{
+    char *tmp = a->value;
+    a->value = b->value;
+    b->value = tmp;
+}
 
 /* Create an empty queue */
 struct list_head *q_new()
@@ -174,7 +180,26 @@ void q_swap(struct list_head *head)
 }
 
 /* Reverse elements in queue */
-void q_reverse(struct list_head *head) {}
+void q_reverse(struct list_head *head)
+{
+    if (!head || list_empty(head))
+        return;
+
+    struct list_head *h = head->next;
+    struct list_head *t = head->prev;
+
+    while (h != t) {
+        swap_element(list_entry(h, element_t, list),
+                     list_entry(t, element_t, list));
+
+        if (h->next == t) {
+            break;
+        }
+
+        h = h->next;
+        t = t->prev;
+    }
+}
 
 /* Sort elements of queue in ascending order */
 void q_sort(struct list_head *head) {}
