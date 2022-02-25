@@ -93,7 +93,7 @@ bool q_insert_tail(struct list_head *head, char *s)
 /* Remove an element from head of queue */
 element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 {
-    if (!head || head->next == head)
+    if (!head || list_empty(head))
         return NULL;
 
     struct list_head *node = head->next;
@@ -111,7 +111,7 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 /* Remove an element from tail of queue */
 element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
 {
-    if (!head || head->next == head)
+    if (!head || list_empty(head))
         return NULL;
 
     struct list_head *node = head->prev;
@@ -144,7 +144,7 @@ bool q_delete_mid(struct list_head *head)
 {
     // https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/
 
-    if (!head || head->next == head)
+    if (!head || list_empty(head))
         return false;
 
     struct list_head *mid = head->next;
