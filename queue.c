@@ -214,5 +214,62 @@ void q_reverse(struct list_head *head)
     }
 }
 
+static struct list_head *merge_sort(struct list_head *start,
+                                    struct list_head *end)
+{
+    if (start == end)
+        return start;
+
+    struct list_head *mid = start;
+    struct list_head *flag = start;
+
+    // If more than 2 nodes, split list into 2 parts and do merge sort on them
+    while (flag->next && flag->next->next) {
+        flag = flag->next->next;
+        mid = mid->next;
+    }
+
+    flag = mid->next;
+    mid->next = NULL;
+
+    struct list_head *left = merge_sort(start, mid);
+    struct list_head *right = merge_sort(flag, end);
+
+    struct list_head *result = NULL;
+    struct list_head **result_p = &result;
+
+    // Merge two sorted lists
+    for (; left && right; result_p = &(*result_p)->next) {
+        element_t *l = list_entry(left, element_t, list);
+        element_t *r = list_entry(right, element_t, list);
+
+        struct list_head **this_p =
+            strcmp(l->value, r->value) <= 0 ? &left : &right;
+        *result_p = *this_p;
+        *this_p = (*this_p)->next;
+    }
+    *result_p = left ? left : right;
+
+    return result;
+}
+
 /* Sort elements of queue in ascending order */
-void q_sort(struct list_head *head) {}
+void q_sort(struct list_head *head)
+{
+    if (!head || list_empty(head) || list_is_singular(head))
+        return;
+
+    struct list_head *start = head->next;
+    struct list_head *end = head->prev;
+
+    end->next = NULL;
+    head->next = merge_sort(start, end);
+
+    // Rebuild all prev links
+    struct list_head *node = head;
+    for (; node->next; node = node->next) {
+        node->next->prev = node;
+    }
+    node->next = head;
+    head->prev = node;
+}
